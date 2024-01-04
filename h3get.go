@@ -28,7 +28,7 @@ var (
 	helpFlag          bool
 )
 
-func init() {
+func main() {
 	flag.StringVar(&urlFlag, "url", "", "Specify the URL for the QUIC client")
 	flag.StringVar(&urlFlag, "u", "", "Specify the URL for the QUIC client (shorthand)")
 	flag.BoolVar(&ipv4flag, "ipv4", false, "Use IPv4 for QUIC client")
@@ -43,21 +43,6 @@ func init() {
 	flag.BoolVar(&helpFlag, "h", false, "Print usage (shorthand)")
 	flag.Parse()
 
-	// I had some issues if these environment variables were not set
-	// See https://github.com/quic-go/quic-go/issues/3911
-	err := os.Setenv("QUIC_GO_DISABLE_ECN", quicGoDisableEcn)
-	if err != nil {
-		fmt.Println("[ERROR]:", err)
-		os.Exit(1)
-	}
-	err = os.Setenv("QUIC_GO_DISABLE_GSO", quicGoDisableGso)
-	if err != nil {
-		fmt.Println("[ERROR]:", err)
-		os.Exit(1)
-	}
-}
-
-func main() {
 	if helpFlag {
 		flag.Usage()
 		os.Exit(0)
@@ -67,6 +52,25 @@ func main() {
 		fmt.Println("URL flag is not set")
 		flag.Usage()
 		os.Exit(1)
+	}
+
+	// I had some issues if these environment variables were not set
+	// See https://github.com/quic-go/quic-go/issues/3911
+	_, ecnSet := os.LookupEnv("QUIC_GO_DISABLE_ECN")
+	if !ecnSet {
+		err := os.Setenv("QUIC_GO_DISABLE_ECN", quicGoDisableEcn)
+		if err != nil {
+			fmt.Println("[ERROR]:", err)
+			os.Exit(1)
+		}
+	}
+	_, gsoSet := os.LookupEnv("QUIC_GO_DISABLE_GSO")
+	if !gsoSet {
+		err := os.Setenv("QUIC_GO_DISABLE_GSO", quicGoDisableGso)
+		if err != nil {
+			fmt.Println("[ERROR]:", err)
+			os.Exit(1)
+		}
 	}
 
 	var err error
