@@ -1,0 +1,6 @@
+# Editors
+.idea/
+.vscode/
+
+# Executable
+h3get
